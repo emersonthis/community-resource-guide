@@ -1,5 +1,6 @@
 # Community Resource Guide
 
+!["Screenshot of the resources list"](./preview.png)
 ## Requirements
 
 * A WordPress site
