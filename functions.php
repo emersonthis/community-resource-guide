@@ -110,7 +110,7 @@ function rg_show_terms($id) {
       array( 
         'taxonomy' => 'Category', 
         'object_ids' => $id,
-        'childless' => true 
+        //'childless' => true // this will ignore top level categories that have unchecked children
       )
     );
     if ($termObjects) {
@@ -180,7 +180,7 @@ function rg_list_of_resources() {
 	        echo '<article class="resource-list-item">';
 	        echo '<h2>' . get_the_title() . '</h2>';
           echo rg_show_terms(get_the_ID());
-	        echo '<p>' . $meta['rg_services'][0] . '</p>';
+	        echo wpautop($meta['rg_services'][0]);
           echo '<p class="resource-list-item__address">' . rg_build_address($meta) . '</p>';
           echo (!empty($meta['rg_website'][0])) ? "<p>Website: <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null ;
           echo (!empty($meta['rg_phone'][0])) ? "<p>Phone: <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
