@@ -181,16 +181,16 @@ function rg_list_of_resources() {
 	        echo '<h2>' . get_the_title() . '</h2>';
           echo rg_show_terms(get_the_ID());
 	        echo wpautop($meta['rg_services'][0]);
-          echo '<p class="resource-list-item__address">' . rg_build_address($meta) . '</p>';
-          echo (!empty($meta['rg_website'][0])) ? "<p>Website: <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null ;
-          echo (!empty($meta['rg_phone'][0])) ? "<p>Phone: <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
-          echo (!empty($meta['rg_email'][0])) ? "<p>Email: <a href='mailto:{$meta['rg_email'][0]}'>" .$meta['rg_email'][0] . '</a></p>' : null ;
+          echo (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_build_address($meta) . '</p>' : null;
+          echo (!empty($meta['rg_website'][0])) ? "<p><strong>" . __('Website:', 'resourceguide') . "</strong> <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null;
+          echo (!empty($meta['rg_phone'][0])) ? "<p><strong>" . __('Phone:', 'resourceguide') . "</strong> <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
+          echo (!empty($meta['rg_email'][0])) ? "<p><strong>" . __('Email:', 'resourceguide') . "</strong> <a href='mailto:{$meta['rg_email'][0]}'>" .$meta['rg_email'][0] . '</a></p>' : null ;
           echo "<p>" . rg_show_hours($meta) . "</p>";
           echo "<p>" . rg_show_seasonality($meta) . "</p>";
 	        echo '</article>';
 	    }
 	} else {
-	    echo '<strong>No matching results</strong>';
+	    echo '<strong>' . __('No matching results') . '</strong>';
 	}
   echo '</div>';
 
@@ -311,32 +311,36 @@ function rg_show_hours($meta) {
   
   global $prefix;
   $days = [
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday'
+    __('Monday', 'resourceguide'),
+    __('Tuesday', 'resourceguide'),
+    __('Wednesday', 'resourceguide'),
+    __('Thursday', 'resourceguide'),
+    __('Friday', 'resourceguide'),
+    __('Saturday', 'resourceguide'),
+    __('Sunday', 'resourceguide')
   ];
 
   $intervals = [];
 
   foreach ($days as $day) {
-    $openFieldName = $prefix . $day . '_open';
-    $closeFieldName = $prefix . $day . '_close';
+    $openFieldName = $prefix . strtolower($day) . '_open';
+    $closeFieldName = $prefix . strtolower($day) . '_close';
     $openValue = ( !empty($meta[$openFieldName]) ) ? $meta[$openFieldName][0] : false;
     $closeValue = ( !empty($meta[$closeFieldName]) ) ? $meta[$closeFieldName][0] : false;
     //@TODO This should be localized
     if ($openValue && $closeValue) {
-      $intervals[] = ucwords($day) . ': ' . "$openValue - $closeValue";
+      $intervals[] = '<span class="resource-hours__day">' . $day . ':</span> <span class="resource-hours__time">' . "$openValue - $closeValue" . '</span>';
     } elseif ($openValue) {
-      $intervals[] = ucwords($day) . ': ' . $openValue;
+      $intervals[] = '<span class="resource-hours__day">' . $day . ':</span> <span class="resource-hours__time">' . $openValue . '</span>';
     }
   }
 
   if (!empty($intervals)) {
-    return implode(', ', $intervals);
+    return 
+       '<strong>' . __('Hours', 'resourceguide') . '</strong><br />'
+      .'<span class="resource-hours">'
+        . implode('', $intervals)
+      .'</span>';
   }
 
 }
@@ -351,9 +355,9 @@ function rg_show_seasonality($meta) {
   $stopValue = ( !empty($meta[$stopFieldName]) ) ? date_format(date_create($meta[$stopFieldName][0]), $format) : false;
   //@TODO This should be localized
   if ($startValue && $stopValue) {
-    return "Seasonal: $startValue - $stopValue";
+    return "<strong>" . __('Seasonal:', 'resourceguide') . "</strong> $startValue - $stopValue";
   } elseif ($startValue) {
-    return "Seasonal: $startValue";
+    return "<strong>" . __('Seasonal:', 'resourceguide') . "</strong> $startValue";
   }
 
 }

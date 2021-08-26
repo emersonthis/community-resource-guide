@@ -21,7 +21,8 @@ Version: 0.1;
 	margin-top: 2em;
 }
 
-.resource-list-item > p { margin-top: .5em; }
+.resource-list-item > p,
+.resource-list-item > .p { margin-top: .5em; }
 
 .resource-terms {
 	font-weight: bold;
@@ -60,4 +61,12 @@ Version: 0.1;
 .resource-search input[type="search"] {
 	flex-grow: 1;
 	margin-right: 1em;
+}
+
+
+/* Hours */
+.resource-hours {
+	display: inline-grid;
+	grid-column-gap: .5em;
+	grid-template-columns: auto auto;
 }
