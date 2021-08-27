@@ -137,19 +137,19 @@ function rg_list_of_resources() {
   if ($_GET['resource-searchterm']){
     $args['s'] = $_GET['resource-searchterm'];
   }
-  if ($_GET['resource-category']){
+  if ($_GET['tax_input']['Category']){
     $filters[] = [
       'taxonomy' => 'Category',
       'field' => 'term_id',
-      'terms' => $_GET['resource-category']
+      'terms' => $_GET['tax_input']['Category']
     ];
   }
 
-  if ($_GET['resource-location']){
+  if ($_GET['tax_input']['Location']){
     $filters[] = [
       'taxonomy' => 'Location',
       'field' => 'term_id',
-      'terms' => $_GET['resource-location']
+      'terms' => $_GET['tax_input']['Location']
     ];
   }
 
