@@ -201,41 +201,40 @@ function rg_list_of_resources() {
     ) );  
   echo '</div><!-- .pagination -->';
   
-  /* Restore original Post Data */
+  # Restore original Post Data is good practice
   wp_reset_postdata();
 
 }
 
-// usort callback... shuffle so that children are ordered after parents
-function orderTermsByParent($a, $b) {
-  if ($a->parent == 0 && $b->parent == 0) {
-    return 0;
-  }
-  if ($a->term_id == $b->parent) {
-    return 0;
-  }
-  return 1;
+# wp_terms_checklist() function is only included automatically for the admin panel
+if ( ! function_exists( 'wp_terms_checklist' ) ) {
+  include ABSPATH . 'wp-admin/includes/template.php';
+}
+function rg_print_filters_from_terms($inputName, $taxonomyName) {
+
+  $output = '<ul class="resource-filter-list">';
+
+  $selectedCats = $_GET['tax_input'][$taxonomyName];
+
+  $output .= wp_terms_checklist(null, [
+    'selected_cats' => $selectedCats,
+    'checked_ontop' => false,
+    'taxonomy' => $taxonomyName,
+    'echo' => false,
+    'walker' => new ResourceFilterWalker()
+  ]);
+
+  $output .= '</ul>';
+
+  echo $output;
 }
 
-function rg_filter_should_be_checked($term, $inputName) {
-  if (!empty($_GET[$inputName]) ) {
-    return in_array($term->term_id, $_GET[$inputName]);
-  }
-  return false;
-}
-
-// This should probably use wp_terms_checklist()
-// https://developer.wordpress.org/reference/functions/wp_terms_checklist/
-function rg_print_filters_from_terms($inputName, $terms) {
-  usort($terms, 'orderTermsByParent');
-  foreach ($terms as $term) {
-
-    $checked = rg_filter_should_be_checked($term, $inputName);
-    
-    echo "<div class='resource-filter__item " . (($term->parent === 0) ? 'resource-filter__item--parent' : 'resource-filter__item--child') . "'>";
-    echo "<input type='checkbox' value='{$term->term_id}' name='{$inputName}[]' ".( ($checked) ? 'checked' : null).">";
-    echo "<label>{$term->name}</label>";
-    echo "</div>";
+class ResourceFilterWalker extends Walker_Category_Checklist {
+  function display_element($element, &$children_elements, $max_depth, $depth, $args, &$output) {
+    // Skip "Uncategorized" default category
+    // @TODO This should become a filterable option
+    if ($element->term_id === 1) { return; }
+    parent::display_element($element, $children_elements, $max_depth, $depth, $args, $output);
   }
 }
 
@@ -253,31 +252,14 @@ function rg_show_resource_filters() {
   echo  '<input type="submit" value="search" />';
   echo '</div>';
 
-
-  // arguments for function wp_list_categories
-  $categoryArgs = array( 
-  'taxonomy' => 'Category',
-  'echo' => false,
-  'exclude' => 1
-  );
-  $categoryTerms = get_terms($categoryArgs);
   echo '<div class="resource-filter">';
   echo '<strong>Filter by Category</strong>';
-  rg_print_filters_from_terms('resource-category', $categoryTerms);
+  rg_print_filters_from_terms('resource-category', 'Category');
   echo '</div>';
 
-
-  // arguments for function wp_list_categories
-  $locationArgs = array( 
-  'taxonomy' => 'Location',
-  'echo' => false,
-  'exclude' => 1,
-  'hide_empty' => false
-  );
-  $locationTerms = get_terms($locationArgs);
   echo '<div class="resource-filter">';
   echo '<strong>Filter by Location</strong>';
-  rg_print_filters_from_terms('resource-location', $locationTerms);
+  rg_print_filters_from_terms('resource-location', 'Location');
   echo '</div>';
 
   echo '<div class="resource-filter">';
@@ -327,7 +309,6 @@ function rg_show_hours($meta) {
     $closeFieldName = $prefix . strtolower($day) . '_close';
     $openValue = ( !empty($meta[$openFieldName]) ) ? $meta[$openFieldName][0] : false;
     $closeValue = ( !empty($meta[$closeFieldName]) ) ? $meta[$closeFieldName][0] : false;
-    //@TODO This should be localized
     if ($openValue && $closeValue) {
       $intervals[] = '<span class="resource-hours__day">' . $day . ':</span> <span class="resource-hours__time">' . "$openValue - $closeValue" . '</span>';
     } elseif ($openValue) {

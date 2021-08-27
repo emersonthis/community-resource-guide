@@ -45,12 +45,19 @@ Version: 0.1;
 }
 
 .resource-filter + .resource-filter { margin-left: 2em;}
-
+/* 
 .resource-filter__item--child {
 	margin-left: 2em;
 }
 .resource-filter__item--parent {
 	margin-left: 0;
+} */
+.resource-filter-list,
+.resource-filter-list ul {
+	list-style: none;
+}
+ul.resource-filter-list {
+	padding-left: 0;
 }
 
 
