@@ -116,9 +116,9 @@ function rg_show_terms($id) {
     if ($termObjects) {
       echo '<div class="resource-terms">';
       foreach ($termObjects as $term) {
-        $termNames[] = $term->name;
+        $termNames[] = '<span class="resource-term">' . $term->name . '</span>';
       } 
-      echo implode(', ', $termNames);
+      echo implode('', $termNames);
       echo '</div>';
     }
 }

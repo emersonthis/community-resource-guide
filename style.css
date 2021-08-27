@@ -24,9 +24,14 @@ Version: 0.1;
 .resource-list-item > p,
 .resource-list-item > .p { margin-top: .5em; }
 
-.resource-terms {
+.resource-terms .resource-term + .resource-term{
+	margin-left: .5em;
+}
+.resource-term {
 	font-weight: bold;
 	text-transform: uppercase;
+	border: .125em solid currentcolor;
+	padding: .125em .25em;
 }
 
 .resource-filters {
