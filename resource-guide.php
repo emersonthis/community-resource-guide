@@ -1,16 +1,26 @@
 <?php
 
+/**
+ * Plugin Name: Resource Guide
+ * Author: Emerson This
+ * Author URI: https://emersonthis.com/
+ * License: GNU General Public License v2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: resourceguide
+ * Plugin Type: Piklist
+ */
+
 $resourcePostType = 'rg_resource';
 $prefix = 'rg_';
 $textdomain = 'resourceguide'; // This should match style.css
 
-// Check and warn if piklist library plugin isn't active
+# Check and warn if piklist library plugin isn't active
 add_action('init', 'rg_init_function');
 function rg_init_function(){
   if(is_admin()){
    include_once(__DIR__ . '/piklist-checker.php');
  
-   if (!piklist_checker::check(__FILE__, 'theme')){ //use 'theme' parameter when included in a theme
+   if (!piklist_checker::check(__FILE__)){
      return;
    }
   }
@@ -19,11 +29,19 @@ function rg_init_function(){
 // enqueue styles
 add_action( 'wp_enqueue_scripts', 'rg_enqueue_styles' );
 function rg_enqueue_styles() {
-    wp_enqueue_style( 'rg-style', get_stylesheet_uri(),
-        array( 'twenty-twenty-one-style' ), 
-        wp_get_theme()->get('Version') // this only works if you have Version in the style header
+    wp_enqueue_style( 'rg-style', plugins_url( 'resource-guide.css', __FILE__ ),
+        [],
+        '0.2'
     );
 }
+
+# register  shortcodes
+function resource_list_func( $atts ){
+  return rg_resource_filters()
+   . '<hr>'
+   . rg_list_of_resources();
+}
+add_shortcode( 'resource-list', 'resource_list_func' );
 
 // post types
 add_filter('piklist_post_types', 'rg_post_types');
@@ -104,7 +122,8 @@ function rg_pretty_phone($data) {
   }
 }
 
-function rg_show_terms($id) {
+function rg_terms($id) {
+    $output = '';
     $termNames = [];
     $termObjects = get_terms(
       array( 
@@ -114,16 +133,18 @@ function rg_show_terms($id) {
       )
     );
     if ($termObjects) {
-      echo '<div class="resource-terms">';
+      $output .= '<div class="resource-terms">';
       foreach ($termObjects as $term) {
         $termNames[] = '<span class="resource-term">' . $term->name . '</span>';
       } 
-      echo implode('', $termNames);
-      echo '</div>';
+      $output  .= implode('', $termNames);
+      $output .= '</div>';
     }
+    return $output;
 }
 
 function rg_list_of_resources() {
+  $output = '';
   $paged = ( get_query_var( 'page' ) ) ? get_query_var( 'page' ) : 1;
 
   // build the query
@@ -170,36 +191,38 @@ function rg_list_of_resources() {
 
 	$the_query = new WP_Query( $args );
 
-  echo '<div class="rg-resource-list">';
+  $output .= '<div class="rg-resource-list">';
 
 	// The Loop
 	if ( $the_query->have_posts() ) {
 	    while ( $the_query->have_posts() ) {
 	        $the_query->the_post();
 	        $meta = get_post_meta(get_the_ID());
-	        echo '<article class="resource-list-item">';
-	        echo '<h2>' . get_the_title() . '</h2>';
-          echo rg_show_terms(get_the_ID());
-	        echo wpautop($meta['rg_services'][0]);
-          echo (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_build_address($meta) . '</p>' : null;
-          echo (!empty($meta['rg_website'][0])) ? "<p><strong>" . __('Website:', 'resourceguide') . "</strong> <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null;
-          echo (!empty($meta['rg_phone'][0])) ? "<p><strong>" . __('Phone:', 'resourceguide') . "</strong> <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
-          echo (!empty($meta['rg_email'][0])) ? "<p><strong>" . __('Email:', 'resourceguide') . "</strong> <a href='mailto:{$meta['rg_email'][0]}'>" .$meta['rg_email'][0] . '</a></p>' : null ;
-          echo "<p>" . rg_show_hours($meta) . "</p>";
-          echo "<p>" . rg_show_seasonality($meta) . "</p>";
-	        echo '</article>';
+	        $output .= '<article class="resource-list-item">';
+	        $output .= '<h2>' . get_the_title() . '</h2>';
+          $output .= rg_terms(get_the_ID());
+	        $output .= wpautop($meta['rg_services'][0]);
+          $output .= (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_build_address($meta) . '</p>' : null;
+          $output .= (!empty($meta['rg_website'][0])) ? "<p><strong>" . __('Website:', 'resourceguide') . "</strong> <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null;
+          $output .= (!empty($meta['rg_phone'][0])) ? "<p><strong>" . __('Phone:', 'resourceguide') . "</strong> <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
+          $output .= (!empty($meta['rg_email'][0])) ? "<p><strong>" . __('Email:', 'resourceguide') . "</strong> <a href='mailto:{$meta['rg_email'][0]}'>" .$meta['rg_email'][0] . '</a></p>' : null ;
+          $output .= "<p>" . rg_show_hours($meta) . "</p>";
+          $output .= "<p>" . rg_show_seasonality($meta) . "</p>";
+	        $output .= '</article>';
 	    }
 	} else {
-	    echo '<strong>' . __('No matching results') . '</strong>';
+	    $output .= '<strong>' . __('No matching results') . '</strong>';
 	}
-  echo '</div>';
+  $output .= '</div>';
 
-  echo '<div class="pagination">';
-    echo paginate_links( array(
+  $output .= '<div class="pagination">';
+    $output .= paginate_links( array(
         'current' => max( 1, get_query_var('page') ),
         'total' => $the_query->max_num_pages
     ) );  
-  echo '</div><!-- .pagination -->';
+  $output .= '</div><!-- .pagination -->';
+
+  return $output;
   
   # Restore original Post Data is good practice
   wp_reset_postdata();
@@ -210,7 +233,7 @@ function rg_list_of_resources() {
 if ( ! function_exists( 'wp_terms_checklist' ) ) {
   include ABSPATH . 'wp-admin/includes/template.php';
 }
-function rg_print_filters_from_terms($inputName, $taxonomyName) {
+function rg_filters_from_terms($inputName, $taxonomyName) {
 
   $output = '<ul class="resource-filter-list">';
 
@@ -226,7 +249,7 @@ function rg_print_filters_from_terms($inputName, $taxonomyName) {
 
   $output .= '</ul>';
 
-  echo $output;
+  return $output;
 }
 
 class ResourceFilterWalker extends Walker_Category_Checklist {
@@ -238,37 +261,41 @@ class ResourceFilterWalker extends Walker_Category_Checklist {
   }
 }
 
-function rg_show_resource_filters() {
+function rg_resource_filters() {
+
+  $output  = '';
 
   // get page without pagination 
   $obj_id = get_queried_object_id();
   $current_url = get_permalink( $obj_id );
 
   // @TODO This action path should be dynamic in case the page lives somewhere else!
-  echo "<form class='resource-filters' action='" . $current_url . "'>";
+  $output .= "<form class='resource-filters' action='" . $current_url . "'>";
 
-  echo '<div class="resource-search">';
-  echo  '<input type="search" name="resource-searchterm" value="'.($_GET['resource-searchterm']).'" />';
-  echo  '<input type="submit" value="search" />';
-  echo '</div>';
+  $output .= '<div class="resource-search">';
+  $output .=  '<input type="search" name="resource-searchterm" value="'.($_GET['resource-searchterm']).'" />';
+  $output .=  '<input type="submit" value="search" />';
+  $output .= '</div>';
 
-  echo '<div class="resource-filter">';
-  echo '<strong>Filter by Category</strong>';
-  rg_print_filters_from_terms('resource-category', 'Category');
-  echo '</div>';
+  $output .= '<div class="resource-filter">';
+  $output .= '<strong>Filter by Category</strong>';
+  $output .= rg_filters_from_terms('resource-category', 'Category');
+  $output .= '</div>';
 
-  echo '<div class="resource-filter">';
-  echo '<strong>Filter by Location</strong>';
-  rg_print_filters_from_terms('resource-location', 'Location');
-  echo '</div>';
+  $output .= '<div class="resource-filter">';
+  $output .= '<strong>Filter by Location</strong>';
+  $output .= rg_filters_from_terms('resource-location', 'Location');
+  $output .= '</div>';
 
-  echo '<div class="resource-filter">';
-  echo '<strong>Filter by Availability</strong><br>';
-  echo '<input type="checkbox" disabled value="1" name="open-today" '. ($_GET['open-today'] ? 'checked' : null) .'>';
-  echo '<label>Open today (Coming soon!)</label>';
-  echo '</div>';
+  $output .= '<div class="resource-filter">';
+  $output .= '<strong>Filter by Availability</strong><br>';
+  $output .= '<input type="checkbox" disabled value="1" name="open-today" '. ($_GET['open-today'] ? 'checked' : null) .'>';
+  $output .= '<label>Open today (Coming soon!)</label>';
+  $output .= '</div>';
 
-  echo "</form>";
+  $output .= "</form>";
+
+  return $output;
 
 }
 
