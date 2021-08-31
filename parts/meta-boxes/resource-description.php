@@ -12,6 +12,7 @@ piklist('field', array(
   'type' => 'textarea'
   ,'field' => $prefix.'services'
   ,'label' => 'Services'
+  ,'description' => 'What does this resource do or provide? Try to keep this brief and to-the-point 😉'
   // ,'value' => ''
   // ,'help' => 'This is help text.'
   ,'attributes' => array(
