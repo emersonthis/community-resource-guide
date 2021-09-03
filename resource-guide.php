@@ -31,7 +31,7 @@ add_action( 'wp_enqueue_scripts', 'rg_enqueue_styles' );
 function rg_enqueue_styles() {
     wp_enqueue_style( 'rg-style', plugins_url( 'resource-guide.css', __FILE__ ),
         [],
-        '0.2'
+        '0.3'
     );
 }
 
@@ -270,12 +270,14 @@ function rg_resource_filters() {
   $current_url = get_permalink( $obj_id );
 
   // @TODO This action path should be dynamic in case the page lives somewhere else!
-  $output .= "<form class='resource-filters' action='" . $current_url . "'>";
+  $output .= "<form class='resource-list-controls' action='" . $current_url . "'>";
 
   $output .= '<div class="resource-search">';
   $output .=  '<input type="search" name="resource-searchterm" value="'.($_GET['resource-searchterm']).'" />';
   $output .=  '<input type="submit" value="search" />';
   $output .= '</div>';
+
+  $output .= '<div class="resource-filters">';
 
   $output .= '<div class="resource-filter">';
   $output .= '<strong>Filter by Category</strong>';
@@ -292,6 +294,8 @@ function rg_resource_filters() {
   $output .= '<input type="checkbox" disabled value="1" name="open-today" '. ($_GET['open-today'] ? 'checked' : null) .'>';
   $output .= '<label>Open today (Coming soon!)</label>';
   $output .= '</div>';
+
+  $output .= '</div>'; // .resource-filters
 
   $output .= "</form>";
 
