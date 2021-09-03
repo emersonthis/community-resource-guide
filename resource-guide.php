@@ -7,12 +7,40 @@
  * License: GNU General Public License v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: resourceguide
+ * Version: 1.0.0
  * Plugin Type: Piklist
  */
 
+# If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
+ * Currently plugin version.
+ * update it as you release new versions.
+ */
+define( 'RESOURCE_GUIDE_VERSION', '1.0.0' );
+
+// More globals
 $resourcePostType = 'rg_resource';
 $prefix = 'rg_';
 $textdomain = 'resourceguide'; // This should match style.css
+
+function activate_resource_guide() {
+  require_once plugin_dir_path( __FILE__) . 'Setup.class.php';
+  $roles = new resourceguide\Setup();
+  $roles->activate();
+}
+register_activation_hook( __FILE__, 'activate_resource_guide' );
+
+function deactivate_resource_guide() {
+  require_once plugin_dir_path( __FILE__ ) . 'Setup.class.php';
+  $roles = new resourceguide\Setup();
+  $roles->deactivate();
+}
+register_deactivation_hook( __FILE__, 'deactivate_resource_guide' );
+
 
 # Check and warn if piklist library plugin isn't active
 add_action('init', 'rg_init_function');
@@ -63,7 +91,16 @@ add_filter('piklist_post_types', 'rg_post_types');
       ,'rewrite' => array(
         'slug' => 'resource'
       )
-      ,'capability_type' => 'page'
+      ,'capability_type' => 'post'
+      ,'capabilities' => array(
+        'edit_posts' => 'edit_resources',
+        'edit_others_posts' => 'edit_other_resources',
+        'publish_posts' => 'publish_resources',
+        'read_private_posts' => 'read_private_resources',
+        'delete_post' => 'delete_resource',
+        'edit_published_posts' => 'edit_published_resources'
+      )
+      ,'map_meta_cap' => true
     );
     return $post_types;
   }
