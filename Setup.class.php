@@ -54,8 +54,10 @@ class Setup {
         # this role do not have to manually reassigned after deactivating
         # the plugin.
         $contributorRole = get_role( 'resource_contributor' );
-        foreach ($this->contributorCaps as $capability) {
-            $contributorRole->remove_cap( $capability );
+        if ($contributorRole) {
+            foreach ($this->contributorCaps as $capability) {
+                $contributorRole->remove_cap( $capability );
+            }
         }
 
         $editorRole = get_role('editor');
