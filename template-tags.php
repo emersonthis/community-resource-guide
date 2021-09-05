@@ -86,7 +86,7 @@ function rg_list_of_resources() {
 	// The Loop
 	if ( $the_query->have_posts() ) {
         $count = $the_query->found_posts;
-        $output .= '<p><strong>' . sprintf( _n( '%s result', '%s results', $count, 'text-domain' ), number_format_i18n( $count ) ) . '</strong></p>';
+        $output .= '<p><strong>' . sprintf( _n( '%s resource', '%s resources', $count, 'text-domain' ), number_format_i18n( $count ) ) . '</strong></p>';
 	    while ( $the_query->have_posts() ) {
 	        $the_query->the_post();
             $output .= rg_resource(get_post());
