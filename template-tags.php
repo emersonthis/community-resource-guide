@@ -87,7 +87,18 @@ function rg_list_of_resources() {
 	if ( $the_query->have_posts() ) {
         $count = $the_query->found_posts;
         $output .= '<p><strong>' . sprintf( _n( '%s resource', '%s resources', $count, 'text-domain' ), number_format_i18n( $count ) ) . '</strong></p>';
-	    while ( $the_query->have_posts() ) {
+
+        # print button
+        $url = '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $currentUrlQuery = parse_url($url, PHP_URL_QUERY);
+        if ($currentUrlQuery) {
+            $printUrl = $url . '&printmode=1';
+        } else {
+            $printUrl = $url . '?printmode=1';
+        }
+	    $output .= '<a target="_blank" href="' . $printUrl . '">' . __('Print these resources') . '</a>';
+        
+        while ( $the_query->have_posts() ) {
 	        $the_query->the_post();
             $output .= rg_resource(get_post());
 	    }
