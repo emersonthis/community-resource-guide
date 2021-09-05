@@ -39,12 +39,16 @@ function rg_list_of_resources($printMode = false) {
 
   // @TODO Make the default value filterable and/or dashboard setting
   $postsPerPage = ($printMode) ? -1 : 10;
+  $order = ($printMode) ? 'ASC' : 'DESC';
+  $orderby = ($printMode) ? 'title' : 'relevance';
   
   // build the query
 	$args = [
 		'post_type' => 'rg_resource',
-    'posts_per_page' => $postsPerPage,
-    'paged' => $paged
+        'posts_per_page' => $postsPerPage,
+        'paged' => $paged,
+        'order' => $order,
+        'orderby' => $orderby
 	];
   $filters = [];
   // @TODO SECURITY CHECKS!?!
