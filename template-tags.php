@@ -129,6 +129,15 @@ function rg_list_of_resources($printMode = false) {
 
 }
 
+function rg_google_maps_link($resourceMeta) {
+    $address = rg_build_address($resourceMeta);
+    return '<a target="_blank" href="https://maps.google.com?q='
+        . urlencode( $address )
+        . '">'
+        . $address
+        . '</a>';
+}
+
 function rg_resource($resource, $printMode = false) {
 
     $output = '';
@@ -143,7 +152,7 @@ function rg_resource($resource, $printMode = false) {
     $output .= (is_single()) ? '<div class="entry-content">' : null;
     if (is_single() || $printMode) {
         $output .= wpautop($meta['rg_services'][0]);
-        $output .= (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_build_address($meta) . '</p>' : null;
+        $output .= (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_google_maps_link($meta) . '</p>' : null;
         $output .= (!empty($meta['rg_website'][0])) ? "<p><strong>" . __('Website:', 'resourceguide') . "</strong> <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null;
         $output .= (!empty($meta['rg_phone'][0])) ? "<p><strong>" . __('Phone:', 'resourceguide') . "</strong> <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
         $output .= (!empty($meta['rg_email'][0])) ? "<p><strong>" . __('Email:', 'resourceguide') . "</strong> <a href='mailto:{$meta['rg_email'][0]}'>" .$meta['rg_email'][0] . '</a></p>' : null ;
