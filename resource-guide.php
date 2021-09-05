@@ -110,41 +110,55 @@ add_filter('piklist_post_types', 'rg_post_types');
 
 // register taxonomies
 add_filter('piklist_taxonomies', 'rg_resource_tax');
-  function rg_resource_tax($taxonomies) {
+function rg_resource_tax($taxonomies) {
 
-  	  global $resourcePostType;
+  global $resourcePostType;
 
-     $taxonomies[] = array(
-        'post_type' => $resourcePostType
-        ,'name' => 'Location'
-        ,'show_admin_column' => true
-        ,'configuration' => array(
-          'hierarchical' => true
-          ,'labels' => piklist('taxonomy_labels', 'Location')
-          ,'hide_meta_box' => false
-          ,'show_ui' => true
-          ,'query_var' => true
-          ,'rewrite' => array(
-            'slug' => 'resource-location'
-          )
+    $taxonomies[] = array(
+      'post_type' => $resourcePostType
+      ,'name' => 'Location'
+      ,'show_admin_column' => true
+      ,'configuration' => array(
+        'hierarchical' => true
+        ,'labels' => piklist('taxonomy_labels', 'Location')
+        ,'hide_meta_box' => false
+        ,'show_ui' => true
+        ,'query_var' => true
+        ,'rewrite' => array(
+          'slug' => 'resource-location'
         )
-      );
+      )
+    );
 
-     $taxonomies[] = array(
-        'post_type' => $resourcePostType
-        ,'name' => 'Category'
-        ,'show_admin_column' => true
-        ,'configuration' => array(
-          'hierarchical' => true
-          ,'labels' => piklist('taxonomy_labels', 'Category')
-          ,'hide_meta_box' => false
-          ,'show_ui' => true
-          ,'query_var' => true
-          ,'rewrite' => array(
-            'slug' => 'resource-category'
-          )
+    $taxonomies[] = array(
+      'post_type' => $resourcePostType
+      ,'name' => 'Category'
+      ,'show_admin_column' => true
+      ,'configuration' => array(
+        'hierarchical' => true
+        ,'labels' => piklist('taxonomy_labels', 'Category')
+        ,'hide_meta_box' => false
+        ,'show_ui' => true
+        ,'query_var' => true
+        ,'rewrite' => array(
+          'slug' => 'resource-category'
         )
-      );
+      )
+    );
 
-    return $taxonomies;
-  }
+  return $taxonomies;
+}
+
+// Resource template
+add_filter( 'single_template', 'rg_get_custom_post_type_template' );
+ 
+function rg_get_custom_post_type_template( $single_template ) {
+    global $post;
+    global $resourcePostType;
+ 
+    if ( $resourcePostType === $post->post_type ) {
+        $single_template = dirname( __FILE__ ) . '/single-resource.php';
+    }
+ 
+    return $single_template;
+}

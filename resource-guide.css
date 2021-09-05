@@ -18,12 +18,15 @@ Version: 0.2;
 }
 
 .resource-list-item + .resource-list-item {
-	margin-top: 2em;
+	margin-top: 4em;
 }
 
 .resource-list-item > p,
 .resource-list-item > .p { margin-top: .5em; }
 
+p.resource-terms {
+	margin-bottom: 0;
+}
 .resource-terms .resource-term + .resource-term{
 	margin-left: .5em;
 }
@@ -32,6 +35,11 @@ Version: 0.2;
 	text-transform: uppercase;
 	border: .125em solid currentcolor;
 	padding: .125em .25em;
+}
+
+h1.resource-title,
+h2.resource-title {
+	margin-top: 0;
 }
 
 .resource-list-controls {
@@ -97,6 +105,10 @@ ul.resource-filter-list {
 .resource-hours .hours-separator { display: none; }
 .resource-hours-p strong{
 	display: block;
+}
+
+.resource-more-info {
+	font-weight: bold;
 }
 
 @media print {

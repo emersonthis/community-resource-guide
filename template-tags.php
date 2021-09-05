@@ -79,7 +79,7 @@ function rg_list_of_resources() {
 
   }
 
-	$the_query = new WP_Query( $args );
+  $the_query = new WP_Query( $args );
 
   $output .= '<div class="rg-resource-list">';
 
@@ -87,18 +87,7 @@ function rg_list_of_resources() {
 	if ( $the_query->have_posts() ) {
 	    while ( $the_query->have_posts() ) {
 	        $the_query->the_post();
-	        $meta = get_post_meta(get_the_ID());
-	        $output .= '<article class="resource-list-item">';
-	        $output .= '<h2 class="resource-title">' . get_the_title() . '</h2>';
-          $output .= rg_terms(get_the_ID());
-	        $output .= wpautop($meta['rg_services'][0]);
-          $output .= (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_build_address($meta) . '</p>' : null;
-          $output .= (!empty($meta['rg_website'][0])) ? "<p><strong>" . __('Website:', 'resourceguide') . "</strong> <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null;
-          $output .= (!empty($meta['rg_phone'][0])) ? "<p><strong>" . __('Phone:', 'resourceguide') . "</strong> <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
-          $output .= (!empty($meta['rg_email'][0])) ? "<p><strong>" . __('Email:', 'resourceguide') . "</strong> <a href='mailto:{$meta['rg_email'][0]}'>" .$meta['rg_email'][0] . '</a></p>' : null ;
-          $output .= "<p class='resource-hours-p'>" . rg_show_hours($meta) . "</p>";
-          $output .= "<p>" . rg_show_seasonality($meta) . "</p>";
-	        $output .= '</article>';
+            $output .= rg_resource(get_post());
 	    }
 	} else {
 	    $output .= '<strong>' . __('No matching results') . '</strong>';
@@ -117,6 +106,45 @@ function rg_list_of_resources() {
   # Restore original Post Data is good practice
   wp_reset_postdata();
 
+}
+
+function rg_resource($resource) {
+
+    $output = '';
+    $meta = get_post_meta($resource->ID);
+    $output .= '<article id="post-' . get_the_ID() . '" class="'. implode(get_post_class('resource-list-item'), ' ') . '">';
+    $output .= '<header class="entry-header alignwide">';
+    $output .= rg_terms($resource->ID);
+    $output .= (is_single()) ? '<h1 class="resource-title entry-title">' : '<h2 class="resource-title">';
+    if (is_single()) {
+        $output .= $resource->post_title;
+    } else {
+        // $output .= '<a href="' . get_permalink($resource) . '">';
+        $output .= $resource->post_title;
+        // $output .= '</a>';
+    } 
+    $output .= (is_single()) ? '</h1>' : '</h2>';
+    $output .= '</header>';
+    $output .= (is_single()) ? '<div class="entry-content">' : null;
+    if (is_single()) {
+        $output .= wpautop($meta['rg_services'][0]);
+        $output .= (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_build_address($meta) . '</p>' : null;
+        $output .= (!empty($meta['rg_website'][0])) ? "<p><strong>" . __('Website:', 'resourceguide') . "</strong> <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null;
+        $output .= (!empty($meta['rg_phone'][0])) ? "<p><strong>" . __('Phone:', 'resourceguide') . "</strong> <a href='tel:{$meta['rg_phone'][0]}'>" . rg_pretty_phone($meta['rg_phone'][0]) . '</a></p>' : null ;
+        $output .= (!empty($meta['rg_email'][0])) ? "<p><strong>" . __('Email:', 'resourceguide') . "</strong> <a href='mailto:{$meta['rg_email'][0]}'>" .$meta['rg_email'][0] . '</a></p>' : null ;
+        $output .= "<p class='resource-hours-p'>" . rg_show_hours($meta) . "</p>";
+        $output .= "<p>" . rg_show_seasonality($meta) . "</p>";
+    } else {
+        $excerptLength = 200;
+        $output .= '<p>'. substr($meta['rg_services'][0], 0, $excerptLength);
+        $output .= ( strlen($meta['rg_services'][0]) > $excerptLength ) ? __('…') : null;
+        $output .= '</p>';
+
+        $output .= '<a class="resource-more-info" href="'. get_permalink($resource) .'">' . __('More info', 'resourceguide') . '</a>';
+    }
+    $output .= (is_single()) ? '</div>' : null;
+    $output .= '</article>';
+    return $output;
 }
 
 # wp_terms_checklist() function is only included automatically for the admin panel
