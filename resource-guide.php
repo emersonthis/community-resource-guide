@@ -67,9 +67,7 @@ require_once plugin_dir_path( __FILE__) . 'template-tags.php';
 
 # register  shortcodes
 function resource_list_func( $atts ){
-  return rg_resource_filters()
-   . '<hr>'
-   . rg_list_of_resources();
+  return rg_resource_filters() . rg_list_of_resources();
 }
 add_shortcode( 'resource-list', 'resource_list_func' );
 
