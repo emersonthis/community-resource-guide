@@ -147,7 +147,7 @@ function rg_resource_tax($taxonomies) {
   return $taxonomies;
 }
 
-// Resource template
+// Single resource template
 add_filter( 'single_template', 'rg_get_custom_post_type_template' );
  
 function rg_get_custom_post_type_template( $single_template ) {
@@ -159,4 +159,17 @@ function rg_get_custom_post_type_template( $single_template ) {
     }
  
     return $single_template;
+}
+
+
+// Printmode template
+add_filter( 'template_include', 'rg_print_page_template', 99 );
+function rg_print_page_template( $template ) {
+    // @TODO 'rgprintmode' needs to match the param in the button.
+    // @SEE: template-tags.php... 
+    if ( $_GET['rgprintmode'] === '1'  ) {
+        $new_template = plugin_dir_path( __FILE__ ) . 'templates/printmode.php';
+        return $new_template ;
+    }
+    return $template;
 }

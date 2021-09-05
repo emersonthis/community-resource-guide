@@ -33,14 +33,17 @@ function rg_terms($id) {
     return $output;
 }
 
-function rg_list_of_resources() {
+function rg_list_of_resources($printMode = false) {
   $output = '';
   $paged = ( get_query_var( 'page' ) ) ? get_query_var( 'page' ) : 1;
 
+  // @TODO Make the default value filterable and/or dashboard setting
+  $postsPerPage = ($printMode) ? -1 : 10;
+  
   // build the query
 	$args = [
 		'post_type' => 'rg_resource',
-    'posts_per_page' => 10,
+    'posts_per_page' => $postsPerPage,
     'paged' => $paged
 	];
   $filters = [];
@@ -86,21 +89,26 @@ function rg_list_of_resources() {
 	// The Loop
 	if ( $the_query->have_posts() ) {
         $count = $the_query->found_posts;
-        $output .= '<p><strong>' . sprintf( _n( '%s resource', '%s resources', $count, 'text-domain' ), number_format_i18n( $count ) ) . '</strong></p>';
+        $output .= '<p>';
+            $output .= '<strong>' . sprintf( _n( '%s resource', '%s resources', $count, 'text-domain' ), number_format_i18n( $count ) ) . '</strong>';
 
-        # print button
-        $url = '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $currentUrlQuery = parse_url($url, PHP_URL_QUERY);
-        if ($currentUrlQuery) {
-            $printUrl = $url . '&printmode=1';
-        } else {
-            $printUrl = $url . '?printmode=1';
-        }
-	    $output .= '<a target="_blank" href="' . $printUrl . '">' . __('Print these resources') . '</a>';
+            if (!$printMode) {
+                # print button
+                $url = '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                $currentUrlQuery = parse_url($url, PHP_URL_QUERY);
+                if ($currentUrlQuery) {
+                    $printUrl = $url . '&rgprintmode=1';
+                } else {
+                    $printUrl = $url . '?rgprintmode=1';
+                }
+                $output .= ' | <a target="_blank" href="' . $printUrl . '">' . __('Print-friendly mode…') . '</a>';
+            }
+        
+        $output .= '</p>';
         
         while ( $the_query->have_posts() ) {
 	        $the_query->the_post();
-            $output .= rg_resource(get_post());
+            $output .= rg_resource(get_post(), $printMode);
 	    }
 	} else {
 	    $output .= '<strong>' . __('No matching results') . '</strong>';
@@ -121,7 +129,7 @@ function rg_list_of_resources() {
 
 }
 
-function rg_resource($resource) {
+function rg_resource($resource, $printMode = false) {
 
     $output = '';
     $meta = get_post_meta($resource->ID);
@@ -129,17 +137,11 @@ function rg_resource($resource) {
     $output .= '<header class="entry-header alignwide">';
     $output .= rg_terms($resource->ID);
     $output .= (is_single()) ? '<h1 class="resource-title entry-title">' : '<h2 class="resource-title">';
-    if (is_single()) {
-        $output .= $resource->post_title;
-    } else {
-        // $output .= '<a href="' . get_permalink($resource) . '">';
-        $output .= $resource->post_title;
-        // $output .= '</a>';
-    } 
+    $output .= $resource->post_title;
     $output .= (is_single()) ? '</h1>' : '</h2>';
     $output .= '</header>';
     $output .= (is_single()) ? '<div class="entry-content">' : null;
-    if (is_single()) {
+    if (is_single() || $printMode) {
         $output .= wpautop($meta['rg_services'][0]);
         $output .= (!empty($meta['rg_address_1'][0])) ? '<p class="resource-list-item__address"><strong>' . __('Address:', 'resourceguide') . '</strong> ' . rg_build_address($meta) . '</p>' : null;
         $output .= (!empty($meta['rg_website'][0])) ? "<p><strong>" . __('Website:', 'resourceguide') . "</strong> <a href='{$meta['rg_website'][0]}'>" .$meta['rg_website'][0] . '</a></p>' : null;
