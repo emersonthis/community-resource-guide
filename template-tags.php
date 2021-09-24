@@ -200,9 +200,17 @@ function rg_filters_from_terms($inputName, $taxonomyName) {
 
 class ResourceFilterWalker extends Walker_Category_Checklist {
   function display_element($element, &$children_elements, $max_depth, $depth, $args, &$output) {
+        
     // Skip "Uncategorized" default category
     // @TODO This should become a filterable option
     if ($element->term_id === 1) { return; }
+
+    // @TODO It's unclear why $arg[0]['disabled'] is set to FALSE
+    // when a user is not logged in. It may be a permissions issue.
+    // Short term fix = override it
+    if ( isset($args[0]) && is_array($args[0])) {
+      $args[0]['disabled'] = false;
+    }
     parent::display_element($element, $children_elements, $max_depth, $depth, $args, $output);
   }
 }
