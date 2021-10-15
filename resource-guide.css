@@ -58,6 +58,10 @@ h2.resource-title {
 	gap: 1em 2em;
 }
 
+.resource-filter li > ul {
+	padding-left: 1.5em;
+}
+
 /* .resource-filter + .resource-filter { margin-left: 2em;} */
 
 /* 
