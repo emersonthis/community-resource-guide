@@ -54,7 +54,7 @@ function rg_init_function(){
   }
 }
 
-// enqueue styles
+# enqueue styles
 add_action( 'wp_enqueue_scripts', 'rg_enqueue_styles' );
 function rg_enqueue_styles() {
     wp_enqueue_style( 'rg-style', plugins_url( 'resource-guide.css', __FILE__ ),
@@ -71,7 +71,7 @@ function resource_list_func( $atts ){
 }
 add_shortcode( 'resource-list', 'resource_list_func' );
 
-// post types
+# post types
 add_filter('piklist_post_types', 'rg_post_types');
 
   function rg_post_types($post_types) {
@@ -106,7 +106,7 @@ add_filter('piklist_post_types', 'rg_post_types');
   }
 
 
-// register taxonomies
+# register taxonomies
 add_filter('piklist_taxonomies', 'rg_resource_tax');
 function rg_resource_tax($taxonomies) {
 
@@ -147,7 +147,7 @@ function rg_resource_tax($taxonomies) {
   return $taxonomies;
 }
 
-// Single resource template
+# Single resource template
 add_filter( 'single_template', 'rg_get_custom_post_type_template' );
  
 function rg_get_custom_post_type_template( $single_template ) {
@@ -162,7 +162,7 @@ function rg_get_custom_post_type_template( $single_template ) {
 }
 
 
-// Printmode template
+# Printmode template
 add_filter( 'template_include', 'rg_print_page_template', 99 );
 function rg_print_page_template( $template ) {
     // @TODO 'rgprintmode' needs to match the param in the button.
@@ -173,3 +173,33 @@ function rg_print_page_template( $template ) {
     }
     return $template;
 }
+
+# Notify when new resource is submitted
+function rg_new_resource_notify( $postId ) {
+  $newResource = get_post($postId); # get the pending resource / post
+  $users = get_users( # get all users with appropriate roles to approve
+    [ 
+      'role_in'    => [
+        'editor',
+        'administrator'
+      ]
+    ]
+  );
+  # build the email notification
+  $siteTitle = get_bloginfo('name');
+  $siteUrl = get_bloginfo('url');
+  $domain = parse_url($siteUrl)['host'];
+  $subject = 'A new resource is pending';
+  $headers  = 'MIME-Version: 1.0' . "\r\n";
+  $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";    
+  $headers .= 'From: '. $siteTitle .' <noreply@' . $domain . ">\r\n";
+  $message = '<p>A new resource is pending on ' . $siteTitle . ': ';
+  $message .= '<a href="' . get_edit_post_link( $newResource->ID ) . '">'. $newResource->post_title .'</a></p>';
+  # send to email to each user
+  foreach ($users as $user) {
+    wp_mail( $user->user_email, $subject, $message, $headers );  
+  }
+
+}
+add_action( 'pending_' . $resourcePostType, 'rg_new_resource_notify', 10, 2 );
+
