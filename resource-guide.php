@@ -179,7 +179,7 @@ function rg_new_resource_notify( $postId ) {
   $newResource = get_post($postId); # get the pending resource / post
   $users = get_users( # get all users with appropriate roles to approve
     [ 
-      'role_in'    => [
+      'role__in'    => [
         'editor',
         'administrator'
       ]
