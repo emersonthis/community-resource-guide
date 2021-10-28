@@ -4,6 +4,8 @@ namespace resourceguide;
 
 class Setup {
 
+    public static $contributorRoleName = 'resource_contributor';
+
     public function __construct() {
         # initialize vars
         $this->contributorCaps = [
@@ -26,12 +28,12 @@ class Setup {
     public function activate() {
         # Create new role
         add_role(
-            'resource_contributor',
+            self::$contributorRoleName,
             __('Resource Contributor'),
         );
 
         # Add respective permissions
-        $contributorRole = get_role( 'resource_contributor' );
+        $contributorRole = get_role( self::$contributorRoleName );
         foreach ($this->contributorCaps as $capability) {
             $contributorRole->add_cap( $capability );
         }
@@ -53,7 +55,7 @@ class Setup {
         # but removes all of its capabilities. This is so that users with
         # this role do not have to manually reassigned after deactivating
         # the plugin.
-        $contributorRole = get_role( 'resource_contributor' );
+        $contributorRole = get_role( self::$contributorRoleName );
         if ($contributorRole) {
             foreach ($this->contributorCaps as $capability) {
                 $contributorRole->remove_cap( $capability );
